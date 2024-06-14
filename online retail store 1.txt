@@ -1,0 +1,97 @@
+CREATE TABLE Categories (
+    CategoryID INT PRIMARY KEY AUTO_INCREMENT,
+    CategoryName VARCHAR(100) NOT NULL,
+    Description TEXT
+);
+
+CREATE TABLE Products (
+    ProductID INT PRIMARY KEY AUTO_INCREMENT,
+    ProductName VARCHAR(100) NOT NULL,
+    CategoryID INT,
+    UnitPrice DECIMAL(10, 2) NOT NULL,
+    Stock INT NOT NULL,
+    Description TEXT,
+    FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID)
+);
+
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(100) NOT NULL,
+    LastName VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    PhoneNumber VARCHAR(15),
+    Address VARCHAR(255)
+);
+
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY AUTO_INCREMENT,
+    CustomerID INT,
+    OrderDate DATE,
+    TotalAmount DECIMAL(10, 2),
+    Status VARCHAR(50),
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
+
+CREATE TABLE OrderDetails (
+    OrderDetailID INT PRIMARY KEY AUTO_INCREMENT,
+    OrderID INT,
+    ProductID INT,
+    Quantity INT NOT NULL,
+    UnitPrice DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+);
+
+INSERT INTO Categories (CategoryName, Description)
+VALUES 
+('Electronics', 'Devices and gadgets'),
+('Books', 'Printed and digital books');
+
+INSERT INTO Products (ProductName, CategoryID, UnitPrice, Stock, Description)
+VALUES 
+('Smartphone', 1, 699.99, 50, 'Latest model smartphone with 128GB storage'),
+('Laptop', 1, 999.99, 30, 'High performance laptop for gaming and work'),
+('Novel', 2, 19.99, 100, 'Best-selling fiction novel');
+
+INSERT INTO Customers (FirstName, LastName, Email, PhoneNumber, Address)
+VALUES 
+('Alice', 'Johnson', 'alice.johnson@example.com', '555-1234', '123 Maple St'),
+('Bob', 'Smith', 'bob.smith@example.com', '555-5678', '456 Oak St');
+
+INSERT INTO Orders (CustomerID, OrderDate, TotalAmount, Status)
+VALUES 
+(1, '2024-06-01', 719.98, 'Shipped'),
+(2, '2024-06-05', 1019.98, 'Processing');
+
+INSERT INTO OrderDetails (OrderID, ProductID, Quantity, UnitPrice)
+VALUES 
+(1, 1, 1, 699.99),
+(1, 3, 1, 19.99),
+(2, 2, 1, 999.99),
+(2, 3, 1, 19.99);
+
+SELECT o.OrderID, o.OrderDate, o.TotalAmount, o.Status
+FROM Orders o
+JOIN Customers c ON o.CustomerID = c.CustomerID
+WHERE c.CustomerID = 1;
+
+SELECT p.ProductID, p.ProductName, p.UnitPrice, p.Stock, p.Description
+FROM Products p
+JOIN Categories c ON p.CategoryID = c.CategoryID
+WHERE c.CategoryID = 1;
+
+SELECT od.OrderDetailID, p.ProductName, od.Quantity, od.UnitPrice
+FROM OrderDetails od
+JOIN Products p ON od.ProductID = p.ProductID
+WHERE od.OrderID = 1;
+
+SELECT p.ProductName, SUM(od.Quantity * od.UnitPrice) AS TotalSales
+FROM OrderDetails od
+JOIN Products p ON od.ProductID = p.ProductID
+WHERE p.ProductID = 1
+GROUP BY p.ProductName;
+
+SELECT DISTINCT c.CustomerID, c.FirstName, c.LastName, c.Email
+FROM Orders o
+JOIN Customers c ON o.CustomerID = c.CustomerID
+WHERE o.OrderDate BETWEEN '2024-06-01' AND '2024-06-30';

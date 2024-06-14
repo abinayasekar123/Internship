@@ -1,0 +1,60 @@
+CREATE TABLE Guests (
+    GuestID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    Phone VARCHAR(15),
+    Address VARCHAR(255)
+);
+CREATE TABLE Rooms (
+    RoomID INT PRIMARY KEY AUTO_INCREMENT,
+    RoomNumber VARCHAR(10) UNIQUE NOT NULL,
+    RoomType VARCHAR(50) NOT NULL,
+    Beds INT NOT NULL,
+    PricePerNight DECIMAL(10, 2) NOT NULL,
+    IsAvailable BOOLEAN DEFAULT TRUE
+);
+CREATE TABLE Bookings (
+    BookingID INT PRIMARY KEY AUTO_INCREMENT,
+    GuestID INT NOT NULL,
+    RoomID INT NOT NULL,
+    CheckInDate DATE NOT NULL,
+    CheckOutDate DATE NOT NULL,
+    TotalAmount DECIMAL(10, 2) NOT NULL,
+    Status VARCHAR(20) DEFAULT 'Booked',
+    FOREIGN KEY (GuestID) REFERENCES Guests(GuestID),
+    FOREIGN KEY (RoomID) REFERENCES Rooms(RoomID)
+);
+CREATE TABLE Payments (
+    PaymentID INT PRIMARY KEY AUTO_INCREMENT,
+    BookingID INT NOT NULL,
+    PaymentDate DATE NOT NULL,
+    Amount DECIMAL(10, 2) NOT NULL,
+    PaymentMethod VARCHAR(50),
+    FOREIGN KEY (BookingID) REFERENCES Bookings(BookingID)
+);
+INSERT INTO Guests (FirstName, LastName, Email, Phone, Address)
+VALUES 
+('John', 'Doe', 'john.doe@example.com', '123-456-7890', '123 Elm St'),
+('Jane', 'Smith', 'jane.smith@example.com', '234-567-8901', '456 Oak St');
+INSERT INTO Rooms (RoomNumber, RoomType, Beds, PricePerNight, IsAvailable)
+VALUES 
+('101', 'Single', 1, 100.00, TRUE),
+('102', 'Double', 2, 150.00, TRUE),
+('103', 'Suite', 3, 250.00, TRUE);
+INSERT INTO Bookings (GuestID, RoomID, CheckInDate, CheckOutDate, TotalAmount)
+VALUES 
+(1, 1, '2024-06-20', '2024-06-25', 500.00),
+(2, 2, '2024-06-22', '2024-06-27', 750.00);
+INSERT INTO Payments (BookingID, PaymentDate, Amount, PaymentMethod)
+VALUES 
+(1, '2024-06-19', 500.00, 'Credit Card'),
+(2, '2024-06-21', 750.00, 'Debit Card');
+SELECT * FROM Rooms
+WHERE RoomID NOT IN (
+    SELECT RoomID FROM Bookings
+    WHERE (CheckInDate <= '2024-06-22' AND CheckOutDate >= '2024-06-20')
+);
+SELECT * FROM Bookings
+WHERE GuestID = 1;
+SELECT SUM(Amount) AS TotalRevenue FROM Payments;
